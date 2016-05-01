@@ -1,0 +1,53 @@
+#version 330
+layout(location=0) in vec3 position;
+layout(location=1) in vec2 texcoord;
+layout(location=2) in vec3 normal;
+
+// uniform variable can be viewed as a constant
+// you can set the uniform variable by glUniformXXXXXXXX
+// HINT: I do not use model matrix here, but you might need it
+
+out vec2 fTexcoord;
+out vec3 LightingColor; // Resulting color from lighting calculations
+
+// 'out' means vertex shader output for fragment shader
+// fNormal will be interpolated before passing to fragment shader
+
+uniform vec3 lightPos;
+uniform vec3 viewPos;
+uniform vec3 lightColor;
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
+
+
+//all the light vector will be calculate in Vertex Shader stage
+//and then set to Fragment Shader with interpolation to draw 
+
+void main()
+{
+	fTexcoord=texcoord;
+	
+	gl_Position=projection * view * model * vec4(position, 1.0f);
+	vec3 FragPos = vec3(model * vec4(position, 1.0f));
+	vec3 Normal = mat3(transpose(inverse(model))) * normal;  //transfer with model position
+	
+	// Ambient
+	float ambientStrength = 0.3f;
+    vec3 ambient = ambientStrength * lightColor;
+	
+	// Diffuse 
+    vec3 norm = normalize(Normal);
+    vec3 lightDir = normalize(lightPos - FragPos);
+    float diff = max(dot(norm, lightDir), 0.0);
+    vec3 diffuse = 1.5f*diff * lightColor;
+	
+	// Specular
+    float specularStrength = 2.0f;
+    vec3 viewDir = normalize(viewPos - FragPos);
+    vec3 reflectDir =  reflect(-lightDir, norm);  
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 256);
+    vec3 specular = specularStrength * spec * lightColor;  
+	
+	LightingColor = ambient + diffuse + specular;
+}
