@@ -47,7 +47,7 @@ GLfloat last = 0.0f,start = 0.0f;  	// Time of last frame in 1 sec for calculate
 
 GLfloat deltaframe = 0.0f;   // Time between current frame and last frame no delay to calculate animate movement
 GLfloat lastframe = 0.0f;       // Time of last frame no delay  to calculate animate movement
-
+int time_out = 0;
 
 
 std::vector<object_struct> objects;//vertex array object,vertex buffer object and texture(color) for objs
@@ -87,8 +87,11 @@ void do_movement()
 	if (keys[GLFW_KEY_D])
 		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 	if (keys[GLFW_KEY_C]){
+			time_out = 1;
 	}
-	
+	if (keys[GLFW_KEY_V]){
+			time_out = 0;
+	}
 
 }
 
@@ -476,8 +479,11 @@ int main(int argc, char *argv[])
 		
 		
 		//counter-clock wise direction
-		GLfloat angle = -(float)glfwGetTime()*PI/180.0f*50;
-
+		
+		GLfloat angle;
+		if(!time_out)
+			angle = -(float)glfwGetTime()*PI/180.0f*50;
+		
 		//sun movement matrix
 		objects[sun].model =  glm::rotate(objects[sun].model,-angle/5,glm::vec3(0.0f,1.0f,0.0f));
 
